@@ -1,0 +1,13 @@
+{
+    "name": "lullabot/jornada",
+    "description": "A library for calculating working days for teams",
+    "type": "library",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Andrew Berry",
+            "email": "andrew.berry@lullabot.com"
+        }
+    ],
+    "require": {}
+}
