@@ -9,5 +9,18 @@
             "email": "andrew.berry@lullabot.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": "^7.2",
+        "phpunit/phpunit": "^9.3"
+    },
+    "autoload": {
+        "psr-4":  {
+            "\\Lullabot\\Jornada\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4":  {
+            "\\Lullabot\\Jornada\\Tests\\": "tests/src"
+        }
+    }
 }
