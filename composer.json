@@ -15,12 +15,12 @@
     },
     "autoload": {
         "psr-4":  {
-            "\\Lullabot\\Jornada\\": "src/"
+            "Lullabot\\Jornada\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4":  {
-            "\\Lullabot\\Jornada\\Tests\\": "tests/src"
+            "Lullabot\\Jornada\\Tests\\": "tests/src"
         }
     }
 }
