@@ -19,6 +19,11 @@ class WorkingDaysCalculator
     private $holidays = [];
 
     /**
+     * @var int
+     */
+    private $unbookedHolidayDays = 0;
+
+    /**
      * Set holiday days, in addition to weekends.
      *
      * @param \DateTimeInterface[] $holidays
@@ -34,6 +39,23 @@ class WorkingDaysCalculator
     public function addHoliday(\DateTimeInterface $dateTime)
     {
         $this->holidays[] = $dateTime;
+    }
+
+    /**
+     * Return the total number of holidays that have been added.
+     */
+    public function getTotalHolidays(): int
+    {
+        return \count($this->holidays) + $this->unbookedHolidayDays;
+    }
+
+    /**
+     * Add a number of unbooked holidays to this calculator. These will be
+     * subtracted from any working days returned.
+     */
+    public function addUnbookedHolidayDays(int $days)
+    {
+        $this->unbookedHolidayDays += $days;
     }
 
     /**
@@ -68,6 +90,9 @@ class WorkingDaysCalculator
                 --$days;
             }
         }
+
+        $days -= $this->unbookedHolidayDays;
+
         return $days;
     }
 

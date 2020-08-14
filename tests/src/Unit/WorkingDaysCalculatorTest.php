@@ -10,9 +10,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @coversDefaultClass \Lullabot\Jornada\WorkingDaysCalculator
  */
-class WorkingDaysCalculatorTest extends TestCase {
-
-    public function testGetWorkingDays() {
+class WorkingDaysCalculatorTest extends TestCase
+{
+    public function testGetWorkingDays()
+    {
         // Test 5 days in a week.
         $monday = \DateTime::createFromFormat('Y-m-d', '2020-06-08');
         $friday = \DateTime::createFromFormat('Y-m-d', '2020-06-12');
@@ -20,7 +21,8 @@ class WorkingDaysCalculatorTest extends TestCase {
         $this->assertEquals(5, $calculator->getWorkingDays($monday, $friday));
     }
 
-    public function testGetWorkingDaysImmutable() {
+    public function testGetWorkingDaysImmutable()
+    {
         // Test 5 days in a week.
         $monday = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-06-08');
         $friday = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-06-12');
@@ -121,9 +123,28 @@ class WorkingDaysCalculatorTest extends TestCase {
 
     public function testOverMultipleMonths()
     {
-      $calc = new WorkingDaysCalculator();
-      $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-08-17');
-      $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-12-31');
-      $this->assertEquals(99, $calc->getWorkingDays($startDate, $endDate));
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-08-17');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-12-31');
+        $this->assertEquals(99, $calc->getWorkingDays($startDate, $endDate));
+    }
+
+    public function testWithUnbookedHolidays()
+    {
+        $calc = new WorkingDaysCalculator();
+        $calc->addUnbookedHolidayDays(10);
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-08-17');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-12-31');
+        $this->assertEquals(89, $calc->getWorkingDays($startDate, $endDate));
+    }
+
+    public function testGetTotalHolidays()
+    {
+        $calc = new WorkingDaysCalculator();
+        $this->assertEquals(0, $calc->getTotalHolidays());
+        $calc->addHoliday(new \DateTimeImmutable());
+        $this->assertEquals(1, $calc->getTotalHolidays());
+        $calc->addUnbookedHolidayDays(2);
+        $this->assertEquals(3, $calc->getTotalHolidays());
     }
 }
