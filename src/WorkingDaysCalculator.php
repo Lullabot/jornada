@@ -11,8 +11,8 @@ namespace Lullabot\Jornada;
  * ignores all times included with the dates except for the purposes of shifting
  * dates by time zones.
  */
-class WorkingDaysCalculator {
-
+class WorkingDaysCalculator
+{
     /**
      * @var \DateTimeInterface[]
      */
@@ -30,20 +30,14 @@ class WorkingDaysCalculator {
 
     /**
      * Add a new holiday date.
-     *
-     * @param \DateTimeInterface $dateTime
      */
-    public function addHoliday(\DateTimeInterface $dateTime) {
+    public function addHoliday(\DateTimeInterface $dateTime)
+    {
         $this->holidays[] = $dateTime;
     }
 
     /**
      * Get the working days between two dates, including those days.
-     *
-     * @param \DateTimeInterface $startDate
-     * @param \DateTimeInterface $endDate
-     *
-     * @return int
      */
     public function getWorkingDays(
         \DateTimeInterface $startDate,
@@ -71,7 +65,7 @@ class WorkingDaysCalculator {
         );
         foreach ($period as $dt) {
             if (!$this->isWorkingDay($dt)) {
-                $days--;
+                --$days;
             }
         }
         return $days;
@@ -81,10 +75,6 @@ class WorkingDaysCalculator {
      * Return if a given date is a working day.
      *
      * A working day is not a weekend (M-F) and not a holiday.
-     *
-     * @param \DateTimeInterface $date
-     *
-     * @return bool
      */
     public function isWorkingDay(\DateTimeInterface $date): bool
     {
@@ -93,13 +83,10 @@ class WorkingDaysCalculator {
 
     /**
      * Return if a given date is on the weekend.
-     *
-     * @param \DateTimeInterface $date
-     *
-     * @return bool
      */
-    public function isWeekend(\DateTimeInterface $date): bool {
-        return in_array($date->format('D'), ['Sat', 'Sun']);
+    public function isWeekend(\DateTimeInterface $date): bool
+    {
+        return \in_array($date->format('D'), ['Sat', 'Sun']);
     }
 
     /**
@@ -107,10 +94,6 @@ class WorkingDaysCalculator {
      *
      * Holidays change yearly per region, so they must be set by calling one of
      * the holiday methods.
-     *
-     * @param \DateTimeInterface $date
-     *
-     * @return bool
      */
     public function isHoliday(\DateTimeInterface $date): bool
     {
@@ -118,20 +101,15 @@ class WorkingDaysCalculator {
             return false;
         }
 
-        $holidays = array_map(function(\DateTimeInterface $value) {
+        $holidays = array_map(function (\DateTimeInterface $value) {
             return $value->format('Y-m-d');
         }, $this->holidays);
 
-        return (in_array($date->format('Y-m-d'), $holidays));
+        return \in_array($date->format('Y-m-d'), $holidays);
     }
 
     /**
      * Add the given number of working days and return a new date.
-     *
-     * @param \DateTimeInterface $date
-     * @param int $days
-     *
-     * @return \DateTimeImmutable
      */
     public function addDays(\DateTimeInterface $date, int $days): \DateTimeImmutable
     {
@@ -140,7 +118,7 @@ class WorkingDaysCalculator {
             $daysAdded = \DateTimeImmutable::createFromMutable($date);
         }
 
-        for ($i = 0; $i < $days; $i++) {
+        for ($i = 0; $i < $days; ++$i) {
             $daysAdded = $daysAdded->modify('+1 day');
 
             // Push ahead for any holidays and weekends.
@@ -151,5 +129,4 @@ class WorkingDaysCalculator {
 
         return $daysAdded;
     }
-
 }
