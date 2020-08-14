@@ -61,7 +61,10 @@ class WorkingDaysCalculator {
 
         // Include start and end, as we check them below for if they are working
         // days.
-        $days = $startDate->diff($cloned)->d;
+        // https://stackoverflow.com/questions/30446918/what-is-the-difference-between-the-days-and-d-property-in-dateinterval
+        // documents the difference between 'd' (days past number of months) and
+        // 'days' which is the total number of days.
+        $days = $startDate->diff($cloned)->days;
 
         $period = new \DatePeriod(
             $startDate, new \DateInterval('P1D'), $cloned

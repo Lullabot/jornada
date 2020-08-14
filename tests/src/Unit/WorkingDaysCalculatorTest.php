@@ -118,4 +118,12 @@ class WorkingDaysCalculatorTest extends TestCase {
         $addFive = $calculator->addDays($monday, 5);
         $this->assertEquals('2020-06-16', $addFive->format('Y-m-d'));
     }
+
+    public function testOverMultipleMonths()
+    {
+      $calc = new WorkingDaysCalculator();
+      $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-08-17');
+      $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-12-31');
+      $this->assertEquals(99, $calc->getWorkingDays($startDate, $endDate));
+    }
 }
