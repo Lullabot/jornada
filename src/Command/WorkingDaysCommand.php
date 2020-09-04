@@ -16,8 +16,9 @@ class WorkingDaysCommand extends Command
     protected function configure()
     {
         parent::configure();
+        // @todo add CSV, formatted table, and JSON outputs
         $this->setName('member:report')
-            ->setDescription('Generate a report of PTO for team members as a table or CSV')
+            ->setDescription('Generate a report of working days for team members')
             ->addArgument('end-date', InputArgument::REQUIRED, 'The end date to calculate the report to, in YYYY-MM-DD format.')
             ->addOption('booked-pto', '-b', InputOption::VALUE_OPTIONAL, 'Path to booked PTO CSV with columns <person>,<day>.', './booked-pto.csv')
             ->addOption('owed-pto', '-o', InputOption::VALUE_OPTIONAL, 'Path to owed PTO CSV with columns <person>,<type>,<day>.', './owed-pto.csv')
