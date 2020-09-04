@@ -80,7 +80,8 @@ class TeamCalculator
         foreach ($this->calculators as $id => $calculator) {
             $last = $calculator->getLastDay($startDate, $endDate);
             $days = $calculator->getWorkingDays($startDate, $endDate);
-            $results[] = new WorkingDaysResult($id, $startDate, $last, $days);
+            $businessDays = $calculator->getBusinessDays($startDate, $endDate);
+            $results[] = new WorkingDaysResult($id, $startDate, $last, $days, $businessDays);
         }
 
         return $results;

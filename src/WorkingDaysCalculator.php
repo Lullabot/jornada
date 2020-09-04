@@ -151,7 +151,9 @@ class WorkingDaysCalculator
     }
 
     /**
-     * Return the number of business days, inclusive of the start and end dates.
+     * Return the number of business days, inclusive of the start and end dates. Business days are always greater or equal than the number of working days.
+     *
+     * @todo Determine what to do about "global" holidays where business is closed.
      */
     public function getBusinessDays(
         \DateTimeInterface $startDate,

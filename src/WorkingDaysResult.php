@@ -29,12 +29,18 @@ class WorkingDaysResult
      */
     private $days;
 
-    public function __construct(string $id, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate, int $days)
+    /**
+     * @var int
+     */
+    private $businessDays;
+
+    public function __construct(string $id, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate, int $days, int $businessDays)
     {
         $this->id = $id;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->days = $days;
+        $this->businessDays = $businessDays;
     }
 
     public function getId(): string
@@ -57,11 +63,17 @@ class WorkingDaysResult
         return $this->days;
     }
 
+    public function getBusinessDays(): int
+    {
+        return $this->businessDays;
+    }
+
     public function __toString()
     {
         return sprintf(
-            '%s has %s working days remaining, finishing on %s.',
+            '%s has %s business days remaining, %s working days remaining, finishing on %s.',
             $this->getId(),
+            $this->getBusinessDays(),
             $this->getDays(),
             $this->getEndDate()->format('Y-m-d')
         );
