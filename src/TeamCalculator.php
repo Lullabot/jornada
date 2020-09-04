@@ -62,4 +62,27 @@ class TeamCalculator
 
         return $days;
     }
+
+    /**
+     * Return calculated individual results for the whole team.
+     *
+     * @return \Lullabot\Jornada\WorkingDaysResult[]
+     */
+    public function getIndividualResults(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        $results = [];
+        if ($startDate instanceof \DateTime) {
+            $startDate = \DateTimeImmutable::createFromMutable($startDate);
+        } else {
+            $startDate = clone $startDate;
+        }
+
+        foreach ($this->calculators as $id => $calculator) {
+            $last = $calculator->getLastDay($startDate, $endDate);
+            $days = $calculator->getWorkingDays($startDate, $endDate);
+            $results[] = new WorkingDaysResult($id, $startDate, $last, $days);
+        }
+
+        return $results;
+    }
 }

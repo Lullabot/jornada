@@ -10,6 +10,8 @@ namespace Lullabot\Jornada;
  * PHP does not have support for "date only" date objects, so this class
  * ignores all times included with the dates except for the purposes of shifting
  * dates by time zones.
+ *
+ * @todo Support half days as the minimum time off instead of full days only.
  */
 class WorkingDaysCalculator
 {
@@ -65,7 +67,7 @@ class WorkingDaysCalculator
         \DateTimeInterface $startDate,
         \DateTimeInterface $endDate
     ): int {
-        [$days, $period] = $this->generatePeriod($endDate, $startDate);
+        [$days, $period] = $this->generatePeriod($startDate, $endDate);
         foreach ($period as $dt) {
             if (!$this->isWorkingDay($dt)) {
                 --$days;
@@ -81,8 +83,8 @@ class WorkingDaysCalculator
      * Generate a date interval between two dates, and also return the number of days.
      */
     private function generatePeriod(
-        \DateTimeInterface $endDate,
-        \DateTimeInterface $startDate
+        \DateTimeInterface $startDate,
+        \DateTimeInterface $endDate
     ): array {
         if ($endDate < $startDate) {
             throw new \InvalidArgumentException(sprintf('The end date must not be before the start date'));
@@ -155,7 +157,7 @@ class WorkingDaysCalculator
         \DateTimeInterface $startDate,
         \DateTimeInterface $endDate
     ): int {
-        [$days, $period] = $this->generatePeriod($endDate, $startDate);
+        [$days, $period] = $this->generatePeriod($startDate, $endDate);
         foreach ($period as $dt) {
             if ($this->isWeekend($dt)) {
                 --$days;
@@ -187,5 +189,28 @@ class WorkingDaysCalculator
         }
 
         return $daysAdded;
+    }
+
+    /**
+     * Get the last working date between a start date and a project end date.
+     */
+    public function getLastDay(\DateTimeInterface $startDate, \DateTimeInterface $endDate): \DateTimeImmutable
+    {
+        if ($startDate instanceof \DateTime) {
+            $last = \DateTimeImmutable::createFromMutable($startDate);
+        } else {
+            $last = clone $startDate;
+        }
+
+        [$days, $period] = $this->generatePeriod($startDate, $endDate);
+        foreach ($period as $dt) {
+            if (!$this->isWorkingDay($dt)) {
+                $last = $last->modify('+1 day');
+            }
+        }
+
+        $last = $last->modify(sprintf('+%s days', $this->unbookedHolidayDays));
+
+        return $last;
     }
 }
