@@ -39,5 +39,5 @@ $ bin/console member:report 2020-12-31 --booked-pto=../booked-pto.csv --owed-pto
 
 ## Key APIs
 
-* [WorkingDaysCalculator](src/WorkingDaysCalcualtor.php) supports calculating business days, working days, and end dates for arbitrary ranges of dates based on existing and future holiday plans.
+* [WorkingDaysCalculator](src/WorkingDaysCalculator.php) supports calculating business days, working days, and end dates for arbitrary ranges of dates based on existing and future holiday plans.
 * [TeamCalculator](src/TeamCalculator.php) supports grouping multiple WorkingDaysCalculators together, and then calculating results for an entire team.
