@@ -65,6 +65,25 @@ class WorkingDaysCalculator
         \DateTimeInterface $startDate,
         \DateTimeInterface $endDate
     ): int {
+        [$days, $period] = $this->generatePeriod($endDate, $startDate);
+        foreach ($period as $dt) {
+            if (!$this->isWorkingDay($dt)) {
+                --$days;
+            }
+        }
+
+        $days -= $this->unbookedHolidayDays;
+
+        return $days;
+    }
+
+    /**
+     * Generate a date interval between two dates, and also return the number of days.
+     */
+    private function generatePeriod(
+        \DateTimeInterface $endDate,
+        \DateTimeInterface $startDate
+    ): array {
         if ($endDate < $startDate) {
             throw new \InvalidArgumentException(sprintf('The end date must not be before the start date'));
         }
@@ -85,15 +104,8 @@ class WorkingDaysCalculator
         $period = new \DatePeriod(
             $startDate, new \DateInterval('P1D'), $cloned
         );
-        foreach ($period as $dt) {
-            if (!$this->isWorkingDay($dt)) {
-                --$days;
-            }
-        }
 
-        $days -= $this->unbookedHolidayDays;
-
-        return $days;
+        return [$days, $period];
     }
 
     /**
@@ -126,18 +138,40 @@ class WorkingDaysCalculator
             return false;
         }
 
-        $holidays = array_map(function (\DateTimeInterface $value) {
-            return $value->format('Y-m-d');
-        }, $this->holidays);
+        $holidays = array_map(
+            function (\DateTimeInterface $value) {
+                return $value->format('Y-m-d');
+            },
+            $this->holidays
+        );
 
         return \in_array($date->format('Y-m-d'), $holidays);
     }
 
     /**
+     * Return the number of business days, inclusive of the start and end dates.
+     */
+    public function getBusinessDays(
+        \DateTimeInterface $startDate,
+        \DateTimeInterface $endDate
+    ): int {
+        [$days, $period] = $this->generatePeriod($endDate, $startDate);
+        foreach ($period as $dt) {
+            if ($this->isWeekend($dt)) {
+                --$days;
+            }
+        }
+
+        return $days;
+    }
+
+    /**
      * Add the given number of working days and return a new date.
      */
-    public function addDays(\DateTimeInterface $date, int $days): \DateTimeImmutable
-    {
+    public function addDays(
+        \DateTimeInterface $date,
+        int $days
+    ): \DateTimeImmutable {
         $daysAdded = clone $date;
         if ($date instanceof \DateTime) {
             $daysAdded = \DateTimeImmutable::createFromMutable($date);
