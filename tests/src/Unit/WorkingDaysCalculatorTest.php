@@ -147,4 +147,100 @@ class WorkingDaysCalculatorTest extends TestCase
         $calc->addUnbookedHolidayDays(2);
         $this->assertEquals(3, $calc->getTotalHolidays());
     }
+
+    public function testGetLastDay()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-02');
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-02', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayTwoWorkingDays()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-29');
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-09-29', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayInvalidStartDate()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-27');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-27');
+        $this->expectException(\InvalidArgumentException::class);
+        $calc->getLastDay($startDate, $endDate);
+    }
+
+    public function testGetLastDayInvalidEndDate()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-25');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-27');
+        $this->expectException(\InvalidArgumentException::class);
+        $calc->getLastDay($startDate, $endDate);
+    }
+
+    public function testGetLastDayWithHolidays()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-09');
+        $calc->addHoliday(\DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-29'));
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-09', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayBeforeEnd()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-09');
+        $calc->addHoliday(\DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-29'));
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-09', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayBeforeProjectEnd()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-09');
+        $calc->addUnbookedHolidayDays(1);
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-08', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayBeforeProjectEndWithHoliday()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-09');
+        $calc->addHoliday(\DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-29'));
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-09', $last->format('Y-m-d'));
+    }
+
+    public function testGetLastDayBeforeProjectEndWithUnbookedHoliday()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-10-09');
+        $calc->addUnbookedHolidayDays(1);
+        $calc->addHoliday(\DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-29'));
+        $last = $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-10-08', $last->format('Y-m-d'));
+    }
+
+    public function testInvalidDateRange()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-09-28');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->assertEquals('', $calc->getLastDay($startDate, $endDate)->format('Y-m-d'));
+    }
 }

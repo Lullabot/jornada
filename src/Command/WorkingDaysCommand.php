@@ -11,6 +11,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Symfony Console command for calculating working days.
+ */
 class WorkingDaysCommand extends Command
 {
     protected function configure()

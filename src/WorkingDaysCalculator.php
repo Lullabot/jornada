@@ -61,7 +61,7 @@ class WorkingDaysCalculator
     }
 
     /**
-     * Get the working days between two dates, including those days.
+     * Get the working days between two dates, including those days, and removing any unbooked holidays.
      */
     public function getWorkingDays(
         \DateTimeInterface $startDate,
@@ -77,37 +77,6 @@ class WorkingDaysCalculator
         $days -= $this->unbookedHolidayDays;
 
         return $days;
-    }
-
-    /**
-     * Generate a date interval between two dates, and also return the number of days.
-     */
-    private function generatePeriod(
-        \DateTimeInterface $startDate,
-        \DateTimeInterface $endDate
-    ): array {
-        if ($endDate < $startDate) {
-            throw new \InvalidArgumentException(sprintf('The end date must not be before the start date'));
-        }
-
-        // By default diff and intervals don't include the last date. Extend
-        // by one day so we are inclusive of the end date. We need to clone in
-        // the case that $endDate is a \DateTime and not \DateTimeImmutable.
-        $cloned = clone $endDate;
-        $cloned = $cloned->modify('+1 day');
-
-        // Include start and end, as we check them below for if they are working
-        // days.
-        // https://stackoverflow.com/questions/30446918/what-is-the-difference-between-the-days-and-d-property-in-dateinterval
-        // documents the difference between 'd' (days past number of months) and
-        // 'days' which is the total number of days.
-        $days = $startDate->diff($cloned)->days;
-
-        $period = new \DatePeriod(
-            $startDate, new \DateInterval('P1D'), $cloned
-        );
-
-        return [$days, $period];
     }
 
     /**
@@ -194,25 +163,95 @@ class WorkingDaysCalculator
     }
 
     /**
-     * Get the last working date between a start date and a project end date.
+     * Get the last working date between a start date and an end date.
+     *
+     * This assumes that all unbooked holidays will be taken in the range in
+     * between the start date and whenever the last working day is. To
+     * calculate
+     * the last working day without unbooked holidays, set them to 0.
+     *
+     * Any unbooked holidays are assumed to be taken at the end of the project.
+     *
+     * @param \DateTimeInterface $startDate   the first working day to start
+     *                                        from
+     * @param \DateTimeInterface $endDate     the last possible working day
+     *
+     * @return \DateTimeImmutable the last working day
      */
     public function getLastDay(\DateTimeInterface $startDate, \DateTimeInterface $endDate): \DateTimeImmutable
     {
+        if (!$this->isWorkingDay($startDate)) {
+            throw new \InvalidArgumentException(sprintf('The start date %s must not be a weekend or holiday', $startDate->format('Y-m-d')));
+        }
+        if (!$this->isWorkingDay($endDate)) {
+            throw new \InvalidArgumentException(sprintf('The end date %s must not be a weekend or holiday', $startDate->format('Y-m-d')));
+        }
+
+        if ($startDate->diff($endDate)->d < 1) {
+            throw new \InvalidArgumentException('There must be at least 2 working days inclusive of the start and end date');
+        }
+
         if ($startDate instanceof \DateTime) {
             $last = \DateTimeImmutable::createFromMutable($startDate);
         } else {
             $last = clone $startDate;
         }
 
-        [$days, $period] = $this->generatePeriod($startDate, $endDate);
-        foreach ($period as $dt) {
-            if (!$this->isWorkingDay($dt)) {
-                $last = $last->modify('+1 day');
-            }
+        if ($endDate instanceof \DateTime) {
+            $endDate = \DateTimeImmutable::createFromMutable($endDate);
+        } else {
+            $endDate = clone $endDate;
         }
 
-        $last = $last->modify(sprintf('+%s days', $this->unbookedHolidayDays));
+        // Handle unbooked holidays by taking them at the end of the project.
+        for ($i = 0; $i < $this->unbookedHolidayDays && (!isset($endDate) || $last < $endDate); ++$i) {
+            $endDate = $endDate->modify('-1 day');
+            while (!$this->isWorkingDay($endDate) && $endDate >= $startDate) {
+                $endDate = $endDate->modify('-1 day');
+            }
+            $last = $endDate;
+        }
+
+        [$days, $period] = $this->generatePeriod($last, $endDate);
+        foreach ($period as $index => $dt) {
+            if (!$this->isWorkingDay($dt)) {
+                continue;
+            }
+
+            $last = $dt;
+        }
 
         return $last;
+    }
+
+    /**
+     * Generate a date interval between two dates, and also return the number of days.
+     */
+    private function generatePeriod(
+        \DateTimeInterface $startDate,
+        \DateTimeInterface $endDate
+    ): array {
+        if ($endDate < $startDate) {
+            throw new \InvalidArgumentException(sprintf('The end date must not be before the start date'));
+        }
+
+        // By default diff and intervals don't include the last date. Extend
+        // by one day so we are inclusive of the end date. We need to clone in
+        // the case that $endDate is a \DateTime and not \DateTimeImmutable.
+        $cloned = clone $endDate;
+        $cloned = $cloned->modify('+1 day');
+
+        // Include start and end, as we check them below for if they are working
+        // days.
+        // https://stackoverflow.com/questions/30446918/what-is-the-difference-between-the-days-and-d-property-in-dateinterval
+        // documents the difference between 'd' (days past number of months) and
+        // 'days' which is the total number of days.
+        $days = $startDate->diff($cloned)->days;
+
+        $period = new \DatePeriod(
+            $startDate, new \DateInterval('P1D'), $cloned
+        );
+
+        return [$days, $period];
     }
 }
