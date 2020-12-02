@@ -32,36 +32,47 @@ class TeamCalculatorCsvFactory
      *
      * @return \Lullabot\Jornada\TeamCalculator
      */
-    public function fromCsv(\SplFileObject $bookedPto, \SplFileObject $owedPto): TeamCalculator
+    public function fromCsv(\SplFileObject $people = null, \SplFileObject $bookedPto = null, \SplFileObject $owedPto = null): TeamCalculator
     {
         $calculators = [];
 
-        $line = 0;
-        $bookedPto->setFlags(\SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
-        while ($data = $bookedPto->fgetcsv()) {
-            if ($line > 0) {
-                $person = $data[0];
-                $date = \DateTimeImmutable::createFromFormat('Y-m-d', $data[1]);
-                if (!isset($calculators[$person])) {
-                    $calculators[$person] = new WorkingDaysCalculator();
-                }
-                $calculators[$person]->addHoliday($date);
+        if ($people) {
+            $people->setFlags(\SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
+            while ($person = $people->getCurrentLine()) {
+                $calculators[$person] = new WorkingDaysCalculator();
             }
-            ++$line;
         }
 
-        $line = 0;
-        $owedPto->setFlags(\SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
-        while ($data = $owedPto->fgetcsv()) {
-            if ($line > 0) {
-                $person = $data[0];
-                $days = (int) $data[2];
-                if (!isset($calculators[$person])) {
-                    $calculators[$person] = new WorkingDaysCalculator();
+        if ($bookedPto) {
+            $line = 0;
+            $bookedPto->setFlags(\SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
+            while ($data = $bookedPto->fgetcsv()) {
+                if ($line > 0) {
+                    $person = $data[0];
+                    $date = \DateTimeImmutable::createFromFormat('Y-m-d', $data[1]);
+                    if (!isset($calculators[$person])) {
+                        $calculators[$person] = new WorkingDaysCalculator();
+                    }
+                    $calculators[$person]->addHoliday($date);
                 }
-                $calculators[$person]->addUnbookedHolidayDays($days);
+                ++$line;
             }
-            ++$line;
+        }
+
+        if ($owedPto) {
+            $line = 0;
+            $owedPto->setFlags(\SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
+            while ($data = $owedPto->fgetcsv()) {
+                if ($line > 0) {
+                    $person = $data[0];
+                    $days = (int) $data[2];
+                    if (!isset($calculators[$person])) {
+                        $calculators[$person] = new WorkingDaysCalculator();
+                    }
+                    $calculators[$person]->addUnbookedHolidayDays($days);
+                }
+                ++$line;
+            }
         }
 
         $team = new TeamCalculator();
