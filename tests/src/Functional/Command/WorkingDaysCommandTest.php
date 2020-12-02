@@ -1,15 +1,15 @@
 <?php
 
-namespace Lullabot\Jornada\Tests\Unit\Command;
+namespace Lullabot\Jornada\Tests\Functional\Command;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
 class WorkingDaysCommandTest extends TestCase
 {
-    const PEOPLE = __DIR__.'/../../../fixtures/csv/people.csv';
-    const BOOKED = __DIR__.'/../../../fixtures/csv/booked-pto.csv';
-    const OWED = __DIR__.'/../../../fixtures/csv/owed-pto.csv';
+    const PEOPLE = __DIR__.'/../../../fixtures/csv/single/people.csv';
+    const BOOKED = __DIR__.'/../../../fixtures/csv/single/booked-pto.csv';
+    const OWED = __DIR__.'/../../../fixtures/csv/single/owed-pto.csv';
 
     private $console = __DIR__.'/../../../../bin/console';
 
@@ -69,6 +69,30 @@ EOD;
 Team business days: 24
 andrew has 24 business days remaining, 22 working days remaining, finishing on 2020-12-29.
 Total team working days: 22
+
+EOD;
+        $this->assertEquals($expected, $process->getOutput());
+    }
+
+    public function testMultipleTeamMembers()
+    {
+        $process = new Process([
+            $this->console,
+            'member:report',
+            '--start-date=2020-11-30',
+            '--booked-pto='.__DIR__.'/../../../fixtures/csv/multiple/booked-pto.csv',
+            '2020-12-31',
+            __DIR__.'/../../../fixtures/csv/multiple/people.csv'
+        ]);
+        $this->runOrFail($process);
+
+        $expected = <<<EOD
+Team business days: 96
+andrew has 24 business days remaining, 23 working days remaining, finishing on 2020-12-31.
+amanda has 24 business days remaining, 21 working days remaining, finishing on 2020-12-31.
+harry has 24 business days remaining, 23 working days remaining, finishing on 2020-12-31.
+zoe has 24 business days remaining, 23 working days remaining, finishing on 2020-12-30.
+Total team working days: 90
 
 EOD;
         $this->assertEquals($expected, $process->getOutput());

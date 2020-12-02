@@ -54,6 +54,15 @@ class WorkingDaysCalculatorTest extends TestCase
         $this->assertEquals(2, $calculator->getWorkingDays($monday, $tuesday));
     }
 
+    public function testTwoWorkingDaysHoliday()
+    {
+        $monday = \DateTime::createFromFormat('Y-m-d', '2020-06-08');
+        $tuesday = \DateTime::createFromFormat('Y-m-d', '2020-06-09');
+        $calculator = new WorkingDaysCalculator();
+        $calculator->addHoliday($monday);
+        $this->assertEquals(1, $calculator->getWorkingDays($monday, $tuesday));
+    }
+
     public function testZeroWorkingDays()
     {
         $monday = \DateTime::createFromFormat('Y-m-d', '2020-06-08');
@@ -175,13 +184,20 @@ class WorkingDaysCalculatorTest extends TestCase
         $calc->getLastDay($startDate, $endDate);
     }
 
-    public function testGetLastDayInvalidEndDate()
+    public function testGetFirstDayWeekend()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = $this->createDate('2020-09-26');
+        $endDate = $this->createDate('2020-09-28');
+        $this->assertEquals('2020-09-28', $calc->getLastDay($startDate, $endDate)->format('Y-m-d'));
+    }
+
+    public function testGetLastDayWeekend()
     {
         $calc = new WorkingDaysCalculator();
         $startDate = $this->createDate('2020-09-25');
         $endDate = $this->createDate('2020-09-27');
-        $this->expectException(\InvalidArgumentException::class);
-        $calc->getLastDay($startDate, $endDate);
+        $this->assertEquals('2020-09-25', $calc->getLastDay($startDate, $endDate)->format('Y-m-d'));
     }
 
     public function testGetLastDayWithHolidays()

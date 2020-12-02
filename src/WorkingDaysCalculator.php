@@ -180,13 +180,6 @@ class WorkingDaysCalculator
      */
     public function getLastDay(\DateTimeInterface $startDate, \DateTimeInterface $endDate): \DateTimeImmutable
     {
-        if (!$this->isWorkingDay($startDate)) {
-            throw new \InvalidArgumentException(sprintf('The start date %s must not be a weekend or holiday', $startDate->format('Y-m-d')));
-        }
-        if (!$this->isWorkingDay($endDate)) {
-            throw new \InvalidArgumentException(sprintf('The end date %s must not be a weekend or holiday', $startDate->format('Y-m-d')));
-        }
-
         if ($startDate->diff($endDate)->d < 1) {
             throw new \InvalidArgumentException('There must be at least 2 working days inclusive of the start and end date');
         }

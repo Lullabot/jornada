@@ -30,6 +30,8 @@ class TeamCalculatorCsvFactory
      * @param \SplFileObject $bookedPto a reference to the CSV with booked PTO
      * @param \SplFileObject $owedPto   a reference to the CSV with owed PTO
      *
+     * @todo Validate each line and throw reasonable errors.
+     *
      * @return \Lullabot\Jornada\TeamCalculator
      */
     public function fromCsv(\SplFileObject $people = null, \SplFileObject $bookedPto = null, \SplFileObject $owedPto = null): TeamCalculator
