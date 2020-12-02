@@ -206,13 +206,13 @@ class WorkingDaysCalculator
         // Handle unbooked holidays by taking them at the end of the project.
         for ($i = 0; $i < $this->unbookedHolidayDays && (!isset($endDate) || $last < $endDate); ++$i) {
             $endDate = $endDate->modify('-1 day');
+            // Skip any previously booked holidays or weekends.
             while (!$this->isWorkingDay($endDate) && $endDate >= $startDate) {
                 $endDate = $endDate->modify('-1 day');
             }
-            $last = $endDate;
         }
 
-        [$days, $period] = $this->generatePeriod($last, $endDate);
+        [$days, $period] = $this->generatePeriod($startDate, $endDate);
         foreach ($period as $index => $dt) {
             if (!$this->isWorkingDay($dt)) {
                 continue;

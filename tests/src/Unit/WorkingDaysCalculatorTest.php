@@ -243,4 +243,14 @@ class WorkingDaysCalculatorTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->assertEquals('', $calc->getLastDay($startDate, $endDate)->format('Y-m-d'));
     }
+
+    public function testLastDayWithUnbookedHolidays()
+    {
+        $calc = new WorkingDaysCalculator();
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-11-30');
+        $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', '2020-12-31');
+        $calc->addUnbookedHolidayDays(2);
+        $this->assertEquals(22, $calc->getWorkingDays($startDate, $endDate));
+        $this->assertEquals('2020-12-29', $calc->getLastDay($startDate, $endDate)->format('Y-m-d'));
+    }
 }
