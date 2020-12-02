@@ -172,9 +172,9 @@ class WorkingDaysCalculator
      *
      * Any unbooked holidays are assumed to be taken at the end of the project.
      *
-     * @param \DateTimeInterface $startDate   the first working day to start
-     *                                        from
-     * @param \DateTimeInterface $endDate     the last possible working day
+     * @param \DateTimeInterface $startDate the first working day to start
+     *                                      from
+     * @param \DateTimeInterface $endDate   the last possible working day
      *
      * @return \DateTimeImmutable the last working day
      */
